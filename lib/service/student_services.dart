@@ -4,11 +4,13 @@ class StudentServices {
   final CollectionReference students =
       FirebaseFirestore.instance.collection('students');
 
-  Future<void> addStudent(int age, String className, String name) {
+  Future<void> addStudent(
+      int age, String className, String schoolId, String name) {
     return students.add({
       'age': age,
       'className': className,
       'name': name,
+      'school_id': schoolId,
       'timestamp': Timestamp.now(),
     });
   }
@@ -18,11 +20,12 @@ class StudentServices {
   }
 
   Future<void> updateStudent(
-      String docId, int age, String className, String name) {
+      String docId, int age, String className, String schoolId, String name) {
     return students.doc(docId).update({
       'age': age,
       'className': className,
       'name': name,
+      'school_id': schoolId,
       'timestamp': Timestamp.now(),
     });
   }

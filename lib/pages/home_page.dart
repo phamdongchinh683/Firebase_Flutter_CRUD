@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_crud_note/pages/class_page.dart';
 import 'package:flutter_crud_note/pages/note_page.dart';
+import 'package:flutter_crud_note/pages/school_page.dart';
 import 'package:flutter_crud_note/pages/student_page.dart';
+import 'package:flutter_crud_note/pages/teacher_page.dart';
 
 void main() => runApp(const NavigationBarApp());
 
@@ -59,9 +61,29 @@ class _NavigationExampleState extends State<NavigationExample> {
             ),
             label: 'Class',
           ),
+          NavigationDestination(
+            icon: Badge(
+              label: Text('4'),
+              child: Icon(Icons.class_),
+            ),
+            label: 'Teacher',
+          ),
+          NavigationDestination(
+            icon: Badge(
+              label: Text('5'),
+              child: Icon(Icons.class_),
+            ),
+            label: 'School',
+          ),
         ],
       ),
-      body: <Widget>[NotePage(), StudentPage(), ClassPage()][currentPageIndex],
+      body: <Widget>[
+        NotePage(),
+        StudentPage(),
+        ClassPage(),
+        TeacherPage(),
+        SchoolPage()
+      ][currentPageIndex],
     );
   }
 }

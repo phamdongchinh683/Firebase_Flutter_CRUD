@@ -1,37 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_crud_note/service/student_services.dart';
+import 'package:flutter_crud_note/service/school_services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class StudentPage extends StatefulWidget {
-  const StudentPage({super.key});
+class SchoolPage extends StatefulWidget {
+  const SchoolPage({super.key});
 
   @override
-  State<StudentPage> createState() => _StudentPageState();
+  State<SchoolPage> createState() => _SchoolPageState();
 }
 
-class _StudentPageState extends State<StudentPage> {
+class _SchoolPageState extends State<SchoolPage> {
   TextEditingController nameController = TextEditingController();
-  TextEditingController ageController = TextEditingController();
-  TextEditingController classController = TextEditingController();
-  TextEditingController schoolIdController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
 
-  StudentServices firestoreServices = StudentServices();
+  SchoolServices firestoreServices = SchoolServices();
 
-  void showStudentBox(String? nameToEdit, int? ageToEdit, String? classToEdit,
-      String? schoolIdToEdit, String? docId, Timestamp? time) {
+  void showSchoolBox(String? addressToEdit, String? nameToEdit,
+      String? phoneToEdit, String? docId, Timestamp? time) {
+    if (addressToEdit != null) {
+      addressController.text = addressToEdit;
+    }
     if (nameToEdit != null) {
-      nameController.text = nameToEdit;
+      nameController.text = nameToEdit.toString();
     }
-    if (ageToEdit != null) {
-      ageController.text = ageToEdit.toString();
-    }
-    if (classToEdit != null) {
-      classController.text = classToEdit;
-    }
-
-    if (schoolIdToEdit != null) {
-      schoolIdController.text = schoolIdToEdit;
+    if (phoneToEdit != null) {
+      phoneController.text = phoneToEdit;
     }
 
     showDialog(
@@ -39,34 +34,29 @@ class _StudentPageState extends State<StudentPage> {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            docId == null ? "Add Student" : "Update Student",
+            docId == null ? "Add School" : "Update School",
             style: GoogleFonts.alexandria(fontSize: 16),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                decoration: const InputDecoration(hintText: 'Student Name'),
+                decoration: const InputDecoration(hintText: 'address'),
+                style: GoogleFonts.alexandria(),
+                controller: addressController,
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                decoration: const InputDecoration(hintText: 'name'),
+                keyboardType: TextInputType.number,
                 style: GoogleFonts.alexandria(),
                 controller: nameController,
               ),
               const SizedBox(height: 10),
               TextField(
-                decoration: const InputDecoration(hintText: 'Age'),
-                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: 'phone'),
                 style: GoogleFonts.alexandria(),
-                controller: ageController,
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                decoration: const InputDecoration(hintText: 'Class Name'),
-                style: GoogleFonts.alexandria(),
-                controller: classController,
-              ),
-              TextField(
-                decoration: const InputDecoration(hintText: 'School Id'),
-                style: GoogleFonts.alexandria(),
-                controller: schoolIdController,
+                controller: phoneController,
               ),
             ],
           ),
@@ -74,28 +64,21 @@ class _StudentPageState extends State<StudentPage> {
             ElevatedButton(
               onPressed: () {
                 if (nameController.text.isNotEmpty &&
-                    ageController.text.isNotEmpty &&
-                    classController.text.isNotEmpty) {
-                  int age = int.tryParse(ageController.text) ?? 0;
+                    addressController.text.isNotEmpty &&
+                    phoneController.text.isNotEmpty) {
                   if (docId == null) {
-                    firestoreServices.addStudent(
-                      age,
-                      classController.text,
-                      nameController.text,
-                      schoolIdController.text,
-                    );
+                    firestoreServices.addSchool(addressController.text,
+                        nameController.text, phoneController.text);
                   } else {
-                    firestoreServices.updateStudent(
+                    firestoreServices.updateSchool(
                         docId,
-                        age,
-                        classController.text,
+                        addressController.text,
                         nameController.text,
-                        schoolIdController.text);
+                        phoneController.text);
                   }
                   nameController.clear();
-                  ageController.clear();
-                  classController.clear();
-                  schoolIdController.clear();
+                  addressController.clear();
+                  phoneController.clear();
                   Navigator.pop(context);
                 }
               },
@@ -125,30 +108,29 @@ class _StudentPageState extends State<StudentPage> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.blue[100],
         label: Text(
-          'Add Student',
+          'Add School',
           style: GoogleFonts.alexandria(fontSize: 18),
         ),
         icon: const Icon(Icons.add),
         onPressed: () {
-          showStudentBox(null, null, null, null, null, null);
+          showSchoolBox(null, null, null, null, null);
         },
       ),
       body: StreamBuilder(
-        stream: firestoreServices.showStudents(),
+        stream: firestoreServices.showSchools(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            List studentList = snapshot.data!.docs;
+            List SchoolList = snapshot.data!.docs;
             return ListView.builder(
-              itemCount: studentList.length,
+              itemCount: SchoolList.length,
               itemBuilder: (context, index) {
-                DocumentSnapshot document = studentList[index];
+                DocumentSnapshot document = SchoolList[index];
                 String docId = document.id;
                 Map<String, dynamic> data =
                     document.data() as Map<String, dynamic>;
+                String address = data['address'] ?? '';
                 String name = data['name'] ?? '';
-                int age = data['age'] ?? 0;
-                String className = data['className'] ?? '';
-                String schoolId = data['school_id'] ?? '';
+                String phone = data['phone'] ?? '';
                 Timestamp time = data['timestamp'];
 
                 return Column(
@@ -163,7 +145,7 @@ class _StudentPageState extends State<StudentPage> {
                         title: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            name,
+                            address,
                             style: GoogleFonts.alexandria(
                                 textStyle: const TextStyle(
                                     color: Colors.blue, fontSize: 19)),
@@ -172,7 +154,7 @@ class _StudentPageState extends State<StudentPage> {
                         subtitle: Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Text(
-                            'Age: $age\nClass: $className',
+                            'name: $name \n phone: $phone',
                             style: GoogleFonts.alexandria(
                               textStyle: const TextStyle(
                                   color: Colors.black87, fontSize: 16),
@@ -186,14 +168,14 @@ class _StudentPageState extends State<StudentPage> {
                               color: Colors.blue[400],
                               icon: const Icon(Icons.edit),
                               onPressed: () {
-                                showStudentBox(name, age, className, docId,
-                                    schoolId, time);
+                                showSchoolBox(
+                                    address, name, phone, docId, time);
                               },
                             ),
                             IconButton(
                               color: Colors.blue[400],
                               onPressed: () {
-                                firestoreServices.deleteStudent(docId);
+                                firestoreServices.deleteSchool(docId);
                               },
                               icon: const Icon(Icons.delete),
                             )
@@ -222,7 +204,7 @@ class _StudentPageState extends State<StudentPage> {
             );
           } else {
             return const Center(
-              child: Text("Nothing to show... add a Student"),
+              child: Text("Nothing to show... add a School"),
             );
           }
         },
